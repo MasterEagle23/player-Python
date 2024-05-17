@@ -39,10 +39,6 @@ def get_overflowing_bases():
     pass
 
 
-def calculate_idle_moves() -> list[PlayerAction]:
-    pass
-
-
 def units_until_upgrade(base: Base) -> int:
     return gamestate.config.base_levels[base.level].upgrade_cost - base.units_until_upgrade
 
