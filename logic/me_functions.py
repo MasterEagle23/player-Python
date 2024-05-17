@@ -32,17 +32,21 @@ def get_base_from_uid(uid: int) -> Base:
     return Base.fromAttributes(Position.fromAttributes(0, 0, 0), -1, 0, 0, 0, 0)
 
 
-def get_upgrade_cost(base:Base) -> int:
-    return gamestate.config.base_levels[base.level+1].upgrade_cost
+def get_upgrade_cost(base: Base) -> int:
+    return gamestate.config.base_levels[base.level + 1].upgrade_cost
 
-def get_max_population(base:Base) -> int:
+
+def get_max_population(base: Base) -> int:
     return gamestate.config.base_levels[base.level].max_population
 
-def get_spawn_rate(base:Base) -> int:
+
+def get_spawn_rate(base: Base) -> int:
     return gamestate.config.base_levels[base.level].spawn_rate
+
 
 def get_grace_period() -> int:
     return gamestate.config.paths.grace_period
+
 
 def get_death_rate() -> int:
     return gamestate.config.paths.death_rate

@@ -24,9 +24,9 @@ def decide(game_state: GameState) -> List[PlayerAction]:
         if base.population > gamestate.config.base_levels[base.level].upgrade_cost:
             actions.append(upgrade(base))
             my_inactive_bases.pop(my_inactive_bases.index(base))
-    
+
     for base in my_inactive_bases:
-        if base.population > get_max_population(base)/2:
+        if base.population > get_max_population(base) / 2:
             for hostilebase in otherbases:
                 tmp_action: PlayerAction = attack(base, hostilebase,
                                                   units_needed_to_defeat_base(base.uid, hostilebase.uid))
