@@ -13,7 +13,11 @@ class Base:
     def fromAttributes(cls, position: Position, uid: int, player: int, population: int, level: int,
                        unitsUntilUpgrade: int):
         base = {
-            'position': position,
+            'position': {
+                'x': position.x,
+                'y': position.y,
+                'z': position.z,
+            },
             'uid': uid,
             'player': player,
             'population': population,
@@ -23,7 +27,7 @@ class Base:
         return cls(base)
 
     def __init__(self, base: dict):
-        self.position = base['position']
+        self.position = Position(base['position'])
         self.uid = base['uid']
         self.player = base['player']
         self.population = base['population']

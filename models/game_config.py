@@ -19,7 +19,7 @@ class PathsConfig:
 
 
 class GameConfig:
-    base_levels: list[BaseLevel]  # all available base levels
+    base_levels: list[BaseLevel] = []    # all available base levels
     paths: PathsConfig  # settings containing paths between bases
 
     @classmethod
@@ -31,5 +31,6 @@ class GameConfig:
         return cls(gameconfig)
 
     def __init__(self, gameconfig: dict) -> None:
-        self.base_levels = gameconfig['base_levels']
-        self.paths = gameconfig['paths']
+        for levels in gameconfig['base_levels']:
+            self.base_levels.append(BaseLevel(levels))
+        self.paths = PathsConfig(gameconfig['paths'])

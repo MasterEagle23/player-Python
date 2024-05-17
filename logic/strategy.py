@@ -7,8 +7,6 @@ from logic.one_functions import *
 from logic.me_functions import *
 
 gamestate: GameState
-
-
 def decide(game_state: GameState) -> List[PlayerAction]:
     global gamestate
     gamestate = game_state
@@ -50,3 +48,4 @@ def get_base_list() -> tuple[List[Base], List[Base]]:
             otherbases.append(base)
 
     return mybases, otherbases
+
