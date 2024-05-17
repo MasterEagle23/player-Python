@@ -13,15 +13,15 @@ def units_needed_to_defeat_base(srcid: int, destid: int) -> int:
     if dist < 0:
         return -1
     units_at_dest_after_travel = destbase.population + gamestate.config.base_levels[destbase.level].spawn_rate * dist
-    return adjust_for_death_rate(units_at_dest_after_travel, dist, gamestate)
+    return adjust_for_death_rate(units_at_dest_after_travel, dist)
 
 
 def adjust_for_death_rate(units_that_arrive: int, distance: int) -> int:
-    return units_that_arrive + get_death_rate * max(distance - get_grace_period, 0)
+    return units_that_arrive + get_death_rate() * max(distance - get_grace_period(), 0)
 
 
 def unit_amount_after_travel(units_sent: int, distance: int) -> int:
-    out = units_sent - get_death_rate * max(distance - get_grace_period, 0)
+    out = units_sent - get_death_rate() * max(distance - get_grace_period(), 0)
     print(f"\treturn: {out}\n")
     return out
 
