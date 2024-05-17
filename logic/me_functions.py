@@ -46,4 +46,4 @@ def get_grace_period() -> int:
     return gamestate.config.paths.grace_period
 
 def get_death_rate() -> int:
-    return gamestate.config.paths.death_rate
+    return gamestate.config.paths.

@@ -56,3 +56,4 @@ def upgrade(base: Base, amount: int = None) -> PlayerAction:
 
 if __name__ == '__main__':
     print(getdistance((1, 2, 3), (4, 5, 6)))
+
