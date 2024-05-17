@@ -12,7 +12,7 @@ def attack(attacker: Base, target: Base, amount: int) -> PlayerAction:
     arriving_units = units_needed_to_defeat_base(attacker.uid , target.uid)
     if arriving_units < 0:
         return PlayerAction(-1, -1, -1)
-    if units_needed_to_defeat_base(attacker.uid , target.uid) < amount:
+    if units_needed_to_defeat_base(attacker.uid, target.uid) < amount:
         return PlayerAction(-1, -1, -1)
     return PlayerAction(attacker.uid, target.uid, amount)
 
