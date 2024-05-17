@@ -1,9 +1,7 @@
 from models.game_state import GameState
 from models.base import Base
-from globals_init import gamestate
+from logic.globals_init import gamestate
 from logic.strategy import *
-
-gamestate
 
 
 def units_needed_to_defeat_base(srcid: int, destid: int) -> int:

@@ -2,7 +2,7 @@ from typing import List
 from models.game_state import GameState
 from models.player_action import PlayerAction
 from models.base import Base
-from globals_init import gamestate
+from logic.globals_init import gamestate
 from logic.x_functions import *
 from logic.one_functions import *
 from logic.me_functions import *

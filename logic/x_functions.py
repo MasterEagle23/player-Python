@@ -1,4 +1,4 @@
-from globals_init import gamestate
+from logic.globals_init import gamestate
 from logic.strategy import *
 from models.base import Base
 from models.player_action import PlayerAction
