@@ -1,7 +1,6 @@
 from models.game_state import GameState
 from models.base import Base
 from logic.strategy import *
-from logic.strategy import gamestate as _gamestate
 
 gamestate = _gamestate
 
