@@ -3,6 +3,7 @@ from models.game_state import GameState
 from models.base import Base
 
 
+
 def units_needed_to_defeat_base(srcid: int, destid: int) -> int:
     destbase = get_base_from_uid(destid)
     srcbase = get_base_from_uid(srcid)
