@@ -1,6 +1,7 @@
 from models.base import Base
 from models.base_level import BaseLevel
 from models.game_state import GameState
+from globals_init import gamestate
 from strategy import *
 
 
