@@ -19,6 +19,14 @@ def decide(game_state: GameState) -> List[PlayerAction]:
 
     otherbases = sort_bases_by_pop(otherbases)
 
+    if len(gamestate.bases) > 20:
+        for source in mybases:
+            for target in otherbases[:20]:
+                if attack_feasible(source, target, int(source.population * 0.5)):
+                    actions.append(attack(source, target, int(source.population * 0.5)))
+                    break
+        return actions
+
     my_inactive_bases = mybases
 
     for base in my_inactive_bases:
