@@ -28,8 +28,7 @@ def decide(game_state: GameState) -> List[PlayerAction]:
     for base in my_inactive_bases:
         if base.population > get_max_population(base) / 2:
             for hostilebase in otherbases:
-                tmp_action: PlayerAction = attack(base, hostilebase,
-                                                  units_needed_to_defeat_base(base.uid, hostilebase.uid))
+                tmp_action: PlayerAction = attack(base, hostilebase, int(base.population * 0.5))
                 if tmp_action.src >= 0 and tmp_action.dest >= 0 and tmp_action.amount > 0:
                     actions.append(tmp_action)
                     my_inactive_bases.pop(my_inactive_bases.index(base))
