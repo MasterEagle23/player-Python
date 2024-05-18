@@ -144,7 +144,7 @@ def get_overflowing_bases():
 
 
 def units_until_upgrade(base: Base) -> int:
-    return gamestate.config.base_levels[base.level].upgrade_cost - base.units_until_upgrade
+    return gamestate.config.base_levels[base.level+1].upgrade_cost - base.units_until_upgrade
 
 
 def upgrade(base: Base, amount: int = None) -> PlayerAction:
