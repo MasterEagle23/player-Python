@@ -2,15 +2,14 @@ from typing import List
 from models.game_state import GameState
 from models.player_action import PlayerAction
 from models.base import Base
-from logic.globals_init import gamestate
+from logic.globals_init import *
 from logic.x_functions import *
 from logic.one_functions import *
 from logic.me_functions import *
 
 
 def decide(game_state: GameState) -> List[PlayerAction]:
-    global gamestate
-    gamestate = game_state
+    setgamestate(game_state)
     actions: List[PlayerAction] = []
 
     mybases, otherbases = get_base_list()
