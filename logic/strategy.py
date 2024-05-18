@@ -36,7 +36,7 @@ def decide(game_state: GameState) -> List[PlayerAction]:
                     break
 
     for base in my_inactive_bases:
-        pass
+        upgrade(base)
 
     print(f'commiting actions: {actions}')
     return actions
