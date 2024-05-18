@@ -17,9 +17,17 @@ class IncomingUnits:
     def __str__(self):
         return str(self.incoming)
 
-    def sum(self, indexes: tuple[int]):
+    def sum(self, indexes: list[int] = ()):
+        if len(indexes) == 0:
+            indexes = range(max(self.incoming.keys))
         sum_units = 0
         for i in indexes:
             if i in self.incoming.keys:
                 sum_units += self.incoming[i]
         return sum_units
+
+    def min(self):
+        min_units = self[0]
+        for u in self.incoming:
+            min_units = min(min_units, u)
+        return min_units

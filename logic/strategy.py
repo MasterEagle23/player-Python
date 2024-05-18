@@ -1,4 +1,3 @@
-import math
 from typing import List
 from models.game_state import GameState
 from models.player_action import PlayerAction
@@ -31,12 +30,11 @@ def decide(game_state: GameState) -> List[PlayerAction]:
             continue
 
     for base in my_inactive_bases:
-        if base.population > get_max_population(base) / 2:
-            for hostilebase in otherbases:
-                if attack_feasible(base, hostilebase, int(base.population * 0.5)):
-                    actions.append(attack(base, hostilebase, int(base.population * 0.5)))
-                    my_inactive_bases.pop(my_inactive_bases.index(base))
-                    break
+        target, amount = select_target(base, otherbases)
+        if attack_feasible(base, target, int(base.population * 0.5)):
+            actions.append(attack(base, target, int(base.population * 0.5)))
+            my_inactive_bases.pop(my_inactive_bases.index(base))
+            break
 
     actions += idle_moves(my_inactive_bases)
 
@@ -109,8 +107,27 @@ def get_death_rate() -> int:
 
 # one_functions
 
-def select_target(hostiles: List[Base]) -> Base:
-    return hostiles[0]
+def get_min_pop(base: Base):
+    return base.population + incoming_units(base).min()
+
+
+def select_target(source: Base, hostiles: List[Base]) -> (Base, int):
+    targets: list[Base] = []
+    reqs: List[int] = []
+    for t in hostiles:
+        if t.player == gamestate.game.player:
+            continue
+        required = t.population - incoming_units(t).sum()
+        required = adjust_for_death_rate(required, getdistance(source, t))
+        if required <= source.population - get_min_pop(source):
+            targets.append(t)
+            reqs.append(required)
+    # select nearest
+    # target = get_nearest(source, targets)
+    # return target, reqs[targets.index(target)]
+    # select cheapest
+    min_req = min(reqs)
+    return targets[reqs.index(min_req)], min_req
 
 
 def get_nearest(source: Base, bases: List[Base]) -> Base:
@@ -135,11 +152,13 @@ def idle_moves(bases: List[Base]) -> List[PlayerAction]:
     for b in bases:
         if is_upgradeable(b):
             acts.append(upgrade(b, base_overflow(b)))
-        elif attack_feasible(b, select_target(get_base_list()[1]), base_overflow(b)):
-            acts.append(attack(b, select_target(get_base_list()[1]), base_overflow(b)))
         else:
-            pass
-
+            target, required = select_target(b, get_base_list()[1])
+            if attack_feasible(b, target, base_overflow(b)):
+                acts.append(attack(b, target, base_overflow(b)))
+            else:
+                # TODO: friend to friend move
+                pass
     return acts
 
 
