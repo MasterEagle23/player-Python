@@ -23,19 +23,18 @@ def decide(game_state: GameState) -> List[PlayerAction]:
     my_inactive_bases = mybases
 
     for base in my_inactive_bases:
-        try:
+        if is_upgradeable(base):
             if base.population > (units_until_upgrade(base)):
                 actions.append(upgrade(base))
                 my_inactive_bases.pop(my_inactive_bases.index(base))
-        except ValueError:
-            pass
+        else:
+            continue
 
     for base in my_inactive_bases:
         if base.population > get_max_population(base) / 2:
             for hostilebase in otherbases:
-                tmp_action: PlayerAction = attack(base, hostilebase, int(base.population * 0.5))
-                if tmp_action.src >= 0 and tmp_action.dest >= 0 and tmp_action.amount > 0:
-                    actions.append(tmp_action)
+                if attack_feasible(base, hostilebase, int(base.population * 0.5)):
+                    actions.append(attack(base, hostilebase, int(base.population * 0.5)))
                     my_inactive_bases.pop(my_inactive_bases.index(base))
                     break
 
@@ -110,17 +109,37 @@ def get_death_rate() -> int:
 
 # one_functions
 
-def select_target(tarets: List[Base]) -> Base:
-    return tarets[0]
+def select_target(hostiles: List[Base]) -> Base:
+    return hostiles[0]
+
+
+def get_nearest(source: Base, bases: List[Base]) -> Base:
+    nearest: Base = source
+    dist = 0
+    for base in bases[1:]:
+        newdist = getdistance(source.position, base.position)
+        if min(dist, newdist) > 0:
+            if dist > newdist:
+                dist = newdist
+                nearest = base
+            continue
+        else:
+            if dist < newdist:
+                dist = newdist
+                nearest = base
+    return nearest
 
 
 def idle_moves(bases: List[Base]) -> List[PlayerAction]:
     acts: List[PlayerAction] = []
     for b in bases:
-        try:
+        if is_upgradeable(b):
             acts.append(upgrade(b, base_overflow(b)))
-        except ValueError:
-            acts.append()
+        elif attack_feasible(b, select_target(get_base_list()[1]), base_overflow(b)):
+            acts.append(attack(b, select_target(get_base_list()[1]), base_overflow(b)))
+        else:
+            pass
+
     return acts
 
 
@@ -162,15 +181,15 @@ def get_overflowing_bases(bases: list[Base]):
             overflowing.append(b)
 
 
-def is_max_level(base: Base) -> bool:
-    return len(gamestate.config.base_levels) > base.level
+def is_upgradeable(base: Base) -> bool:
+    return not len(gamestate.config.base_levels) > base.level
 
 
 def units_until_upgrade(base: Base) -> int:
-    if is_max_level(base):
-        raise ValueError
-    else:
+    if is_upgradeable(base):
         return gamestate.config.base_levels[base.level + 1].upgrade_cost - base.units_until_upgrade
+    else:
+        raise ValueError
 
 
 def upgrade(base: Base, amount: int = None) -> PlayerAction:
@@ -189,12 +208,20 @@ def base_overflow(base: Base):
 # returns difference in base population and max population
 # +val: base overflow, -val: base underflow
 
+
+def attack_feasible(attacker: Base, target: Base, amount: int) -> bool:
+    arriving_units = units_needed_to_defeat_base(attacker.uid, target.uid)
+    return (not arriving_units < 0) and (not units_needed_to_defeat_base(attacker.uid, target.uid) < amount)
+
+
 def attack(attacker: Base, target: Base, amount: int) -> PlayerAction:
     arriving_units = units_needed_to_defeat_base(attacker.uid, target.uid)
     if arriving_units < 0:
-        return PlayerAction(-1, -1, -1)
+        raise ValueError
+        # return PlayerAction(-1, -1, -1)
     if units_needed_to_defeat_base(attacker.uid, target.uid) < amount:
-        return PlayerAction(-1, -1, -1)
+        raise ValueError
+        # return PlayerAction(-1, -1, -1)
     return PlayerAction(attacker.uid, target.uid, amount)
 
 
