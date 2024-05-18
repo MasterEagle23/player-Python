@@ -35,9 +35,7 @@ def decide(game_state: GameState) -> List[PlayerAction]:
                     my_inactive_bases.pop(my_inactive_bases.index(base))
                     break
 
-    if gamestate.game.tick <= 100:
-        for base in my_inactive_bases:
-            upgrade(base)
+    actions += idle_moves(my_inactive_bases)
 
     print(f'commiting actions: {actions}')
     return actions
@@ -111,7 +109,8 @@ def get_death_rate() -> int:
 def idle_moves(bases: List[Base]) -> List[PlayerAction]:
     acts: List[PlayerAction] = []
     for b in bases:
-        upgrade(b)
+        acts.append(upgrade(b, base_overflow(b)))
+    return acts
 
 
 def getdistance(pos1, pos2) -> int:
