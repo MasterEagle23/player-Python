@@ -22,7 +22,7 @@ def decide(game_state: GameState) -> List[PlayerAction]:
     my_inactive_bases = mybases
 
     for base in my_inactive_bases:
-        if base.population > gamestate.config.base_levels[base.level].upgrade_cost:
+        if base.population > (units_until_upgrade(base)):
             actions.append(upgrade(base))
             my_inactive_bases.pop(my_inactive_bases.index(base))
 
