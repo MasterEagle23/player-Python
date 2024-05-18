@@ -1,7 +1,7 @@
 from models.position import Position
 from models.board_action import BoardAction
 from logic.incoming_units import IncomingUnits
-from logic.globals_init import gamestate
+# from logic.globals_init import gamestate
 from logic.strategy import *
 
 

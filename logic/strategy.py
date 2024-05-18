@@ -7,6 +7,8 @@ from logic.x_functions import *
 from logic.one_functions import *
 from logic.me_functions import *
 
+gamestate: GameState
+
 
 def decide(game_state: GameState) -> List[PlayerAction]:
     setgamestate(game_state)
