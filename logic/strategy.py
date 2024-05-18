@@ -110,13 +110,17 @@ def get_death_rate() -> int:
 
 # one_functions
 
+def select_target(tarets: List[Base]) -> Base:
+    return tarets[0]
+
+
 def idle_moves(bases: List[Base]) -> List[PlayerAction]:
     acts: List[PlayerAction] = []
     for b in bases:
         try:
             acts.append(upgrade(b, base_overflow(b)))
         except ValueError:
-            continue
+            acts.append()
     return acts
 
 
