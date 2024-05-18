@@ -1,3 +1,4 @@
+import math
 from typing import List
 from models.game_state import GameState
 from models.player_action import PlayerAction
@@ -22,9 +23,12 @@ def decide(game_state: GameState) -> List[PlayerAction]:
     my_inactive_bases = mybases
 
     for base in my_inactive_bases:
-        if base.population > (units_until_upgrade(base)):
-            actions.append(upgrade(base))
-            my_inactive_bases.pop(my_inactive_bases.index(base))
+        try:
+            if base.population > (units_until_upgrade(base)):
+                actions.append(upgrade(base))
+                my_inactive_bases.pop(my_inactive_bases.index(base))
+        except ValueError:
+            pass
 
     for base in my_inactive_bases:
         if base.population > get_max_population(base) / 2:
@@ -109,7 +113,8 @@ def get_death_rate() -> int:
 def idle_moves(bases: List[Base]) -> List[PlayerAction]:
     acts: List[PlayerAction] = []
     for b in bases:
-        acts.append(upgrade(b, base_overflow(b)))
+        if not is_max_level(b):
+            acts.append(upgrade(b, base_overflow(b)))
     return acts
 
 
@@ -151,8 +156,15 @@ def get_overflowing_bases(bases: list[Base]):
             overflowing.append(b)
 
 
+def is_max_level(base: Base) -> bool:
+    return len(gamestate.config.base_levels) > base.level
+
+
 def units_until_upgrade(base: Base) -> int:
-    return gamestate.config.base_levels[base.level + 1].upgrade_cost - base.units_until_upgrade
+    if is_max_level(base):
+        raise ValueError
+    else:
+        return gamestate.config.base_levels[base.level + 1].upgrade_cost - base.units_until_upgrade
 
 
 def upgrade(base: Base, amount: int = None) -> PlayerAction:
