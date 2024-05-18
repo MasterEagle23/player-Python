@@ -35,8 +35,9 @@ def decide(game_state: GameState) -> List[PlayerAction]:
                     my_inactive_bases.pop(my_inactive_bases.index(base))
                     break
 
-    for base in my_inactive_bases:
-        upgrade(base)
+    if gamestate.game.tick <= 100:
+        for base in my_inactive_bases:
+            upgrade(base)
 
     print(f'commiting actions: {actions}')
     return actions
