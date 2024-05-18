@@ -5,6 +5,7 @@ from models.base import Base
 from logic.incoming_units import IncomingUnits
 from models.position import Position
 
+
 gamestate: GameState
 
 
@@ -107,6 +108,12 @@ def get_death_rate() -> int:
 
 # one_functions
 
+def idle_moves(bases: List[Base]) -> List[PlayerAction]:
+    acts: List[PlayerAction] = []
+    for b in bases:
+        upgrade(b)
+
+
 def getdistance(pos1, pos2) -> int:
     if type(pos1) == type(pos2) == type(Position) and type(pos1) == type(Position):
         return int(((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2 + (pos1.z - pos2.z) ** 2) ** 0.5)
@@ -138,12 +145,15 @@ def incoming_units(base: Base) -> IncomingUnits:
     return incoming
 
 
-def get_overflowing_bases():
-    pass
+def get_overflowing_bases(bases: list[Base]):
+    overflowing: list[Base] = []
+    for b in bases:
+        if 0 < base_overflow(b):
+            overflowing.append(b)
 
 
 def units_until_upgrade(base: Base) -> int:
-    return gamestate.config.base_levels[base.level].upgrade_cost - base.units_until_upgrade
+    return gamestate.config.base_levels[base.level + 1].upgrade_cost - base.units_until_upgrade
 
 
 def upgrade(base: Base, amount: int = None) -> PlayerAction:
