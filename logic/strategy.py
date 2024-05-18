@@ -38,6 +38,7 @@ def decide(game_state: GameState) -> List[PlayerAction]:
     for base in my_inactive_bases:
         pass
 
+    print(f'commiting actions: {actions}')
     return actions
 
 
