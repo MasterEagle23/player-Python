@@ -113,8 +113,10 @@ def get_death_rate() -> int:
 def idle_moves(bases: List[Base]) -> List[PlayerAction]:
     acts: List[PlayerAction] = []
     for b in bases:
-        if not is_max_level(b):
+        try:
             acts.append(upgrade(b, base_overflow(b)))
+        except ValueError:
+            continue
     return acts
 
 
