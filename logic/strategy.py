@@ -97,3 +97,29 @@ def units_above_max(config: GameConfig, base:Base) -> int:
 def distance_3d(pos1: Position, pos2: Position):
     return int(sqrt((pos1.x-pos2.x)**2+(pos1.y-pos2.y)**2+(pos1.y-pos2.y)**2))
 
+def closest_hostile_base (our_base: Base, other_bases: List[Base] ):
+    distance: int = -1
+    closest_ally: Base
+    for base in other_bases:
+        dist_temp: int = distance_3d(our_base.position, base.position)
+        if (-1 == distance):
+            distance = dist_temp
+            closest_ally = base
+        elif (dist_temp < distance):
+            distance = dist_temp
+            closest_ally = base
+    return closest_ally
+
+def closest_ally_base (current_base: Base, our_bases: List[Base]):
+    distance: int = -1
+    closest_ally: Base
+    for base in our_bases:
+        dist_temp: int = distance_3d(current_base.position, base.position)
+        if (-1 == distance):
+            distance = dist_temp
+            closest_ally = base
+        elif (dist_temp < distance):
+            if (0 != dist_temp):
+                closest_ally = base
+                distance = dist_temp
+    return closest_ally
