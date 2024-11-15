@@ -42,10 +42,16 @@ def get_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     return actions
 
 def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
+    upgradebase: Base = mybases[0]
     for base in mybases:
         if base.level < 5:
+            # pick base
             return base
-    return mybases[0]
+        elif base.level < upgradebase.level:
+            # pick lowest base
+            upgradebase = base
+
+    return upgradebase
 
 def get_self_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     actions: List[PlayerAction] = []
