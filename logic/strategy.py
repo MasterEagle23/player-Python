@@ -11,7 +11,9 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
 
-    actions = get_upgrades(mybases, gameState.config)
+    actions: List[PlayerAction]
+
+    actions.append(upgrade_with_overhead (mybases, gameState.config))
 
     # TODO: place your logic here
     return actions
@@ -54,7 +56,7 @@ def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
 
     return upgradebase
 
-def get_self_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
+def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
     Alle pops über max werden in die eigene Base gesteckt
     '''
