@@ -29,6 +29,24 @@ def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base,
 def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: int):
     return units_that_need_to_arrive + get_death_rate(config) * max(distance - get_grace_period(config), 0)
 
+def get_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
+    # pick base to upgrade
+    upgradeBase: Base = pick_upgrade_base(config, mybases)
+
+    # send units to base
+    actions: List[PlayerAction] = []
+
+    for base in mybases:
+        actions.append(PlayerAction(base.uid, upgradeBase.uid, units_above_max(config, base)))
+
+    return actions
+
+def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
+    for base in mybases:
+        if base.level < 5:
+            return base
+    return mybases[0]
+
 def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     actions: List[PlayerAction] = []
     for base in mybases:
