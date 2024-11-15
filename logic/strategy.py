@@ -21,16 +21,25 @@ def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
     pop_in_x_ticks = min(pop_in_x_ticks, get_max_population(config, base) + get_spawn_rate(config, base))
     return pop_in_x_ticks
 
-def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base):
-    
+def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base) -> int: 
+    '''
+    Übergib gegnerbasis und eigene basis. Berechnet, wie viele Units gebraucht werden um die Basis mit +1 Pop einzunehmen.
+    '''
     d = distance_3d(myBase.position, hostileBase.position)
     pop = project_base_pop(config, hostileBase, d)
     return units_to_send(config, d, pop + 1)
 
-def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: int):
+def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: int) -> int:
+    '''
+    Nimmt einen int. Berechnet die Menge an Units, die gebraucht werden, dass die Meneg int an units ankommt
+    '''
     return units_that_need_to_arrive + get_death_rate(config) * max(distance - get_grace_period(config), 0)
 
 def get_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
+    '''
+    Picks all units and sends all overflowing units to that base.
+    '''
+    
     # pick base to upgrade
     upgradeBase: Base = pick_upgrade_base(config, mybases)
 
@@ -43,6 +52,9 @@ def get_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     return actions
 
 def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
+    '''
+    Entscheidet welche Base gerade geupgraded werden soll
+    '''
     upgradebase: Base = mybases[0]
     for base in mybases:
         if base.level < 5:
