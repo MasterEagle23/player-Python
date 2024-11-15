@@ -11,7 +11,7 @@ from math import sqrt
 def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
-    board_action = get_board_action(gameState)
+    # my_board_actions, other_board_actions = get_board_action(gameState)
     actions: List[PlayerAction] = []
 
     actions.append(get_upgrades(gameState.config, mybases))
@@ -96,13 +96,24 @@ def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
 
     return mybases, otherbases
 
-def get_board_action(gameState: GameState) -> List[BoardAction]:
-    '''
-    Zieht sich aus gamestate die BoardActions aller Spieler
-    '''
-    board_actions: List[BoardAction]
-    board_actions= gameState.actions
-    return board_actions
+
+''' pls fix this pile of shit
+def get_board_action(gameState: GameState) -> tuple[List[BoardAction], List[BoardAction]]:
+   
+    # Zieht sich aus gamestate die BoardActions von uns und von allen anderen Spielern
+   
+    my_board_actions: List[BoardAction]
+    other_board_actions= gameState.actions
+    for board_actions in gameState.actions:
+        counter=0
+        if board_actions.player == gameState.actions(counter):
+            my_board_actions.append(board_actions)
+        else:
+            other_board_actions.append(board_actions)
+        counter+=1
+        
+    return my_board_actions, other_board_actions
+'''
 
 def get_death_rate(config: GameConfig) -> int:
     '''
