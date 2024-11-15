@@ -8,15 +8,30 @@ from models.position import Position
 from math import sqrt
 
 
+UPGRADE_GOAL = 5
+
+
 def decide(gameState: GameState) -> List[PlayerAction]:
 
+    config: GameConfig = gameState.config
+
     mybases, otherbases = get_base_lists(gameState)
-    # my_board_actions, other_board_actions = get_board_action(gameState)
+    board_action = get_board_action(gameState)
     actions: List[PlayerAction] = []
 
-    actions.append(get_upgrades(gameState.config, mybases))
+    if len(mybases) == 1:
+        return [do_spam_attack(gameState, mybases[0], otherbases)]
 
-    # TODO: place your logic here
+    actions += get_upgrades(gameState.config, mybases)
+
+    if actions == []:
+        # do some attack
+        srcbase = mybases[0]
+        do_spam_attack(config, srcbase, otherbases)
+        for base in mybases:
+            if base != srcbase:
+                PlayerAction(base.uid, srcbase.uid, base.population - 1)
+
     return actions
 
 def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
@@ -49,6 +64,9 @@ def get_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     # pick base to upgrade
     upgradeBase: Base = pick_upgrade_base(config, mybases)
 
+    if upgradeBase is None:
+        return []
+
     # send units to base
     actions: List[PlayerAction] = []
 
@@ -63,14 +81,10 @@ def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
     '''
     upgradebase: Base = mybases[0]
     for base in mybases:
-        if base.level < 5:
+        if base.level < UPGRADE_GOAL:
             # pick base
             return base
-        elif base.level < upgradebase.level:
-            # pick lowest base
-            upgradebase = base
-
-    return upgradebase
+    return None
 
 def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
@@ -164,3 +178,40 @@ def distance_3d(pos1: Position, pos2: Position):
     Berechnet die Distanz zwischen den übergebenen Punkten, Punkt 1 und Punkt 2
     '''
     return int(sqrt((pos1.x-pos2.x)**2+(pos1.y-pos2.y)**2+(pos1.y-pos2.y)**2))
+
+def closest_hostile_base (our_base: Base, other_bases: List[Base] ):
+    distance: int = -1
+    closest_ally: Base
+    for base in other_bases:
+        dist_temp: int = distance_3d(our_base.position, base.position)
+        if (-1 == distance):
+            distance = dist_temp
+            closest_ally = base
+        elif (dist_temp < distance):
+            distance = dist_temp
+            closest_ally = base
+    return closest_ally
+
+def closest_ally_base (current_base: Base, our_bases: List[Base]):
+    distance: int = -1
+    closest_ally: Base
+    for base in our_bases:
+        dist_temp: int = distance_3d(current_base.position, base.position)
+        if (-1 == distance):
+            distance = dist_temp
+            closest_ally = base
+        elif (dist_temp < distance):
+            if (0 != dist_temp):
+                closest_ally = base
+                distance = dist_temp
+    return closest_ally
+
+def do_spam_attack(config: GameConfig, srcbase: Base, otherbases: List[Base]) -> PlayerAction:
+    '''
+    spams all units exept one to spam the nearest base
+    '''
+    target: Base = closest_hostile_base(srcbase, otherbases)
+
+    attack_amount = srcbase.population - 1
+
+    return PlayerAction(srcbase.uid, target.uid, attack_amount)
