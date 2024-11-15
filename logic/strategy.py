@@ -11,7 +11,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
 
-    actions: List[PlayerAction]
+    actions: List[PlayerAction] = []
 
     actions.append(upgrade_with_overhead (mybases, gameState.config))
 
