@@ -16,7 +16,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     config: GameConfig = gameState.config
 
     mybases, otherbases = get_base_lists(gameState)
-    board_action = get_board_action(gameState)
+    # board_action = get_board_action(gameState)
     actions: List[PlayerAction] = []
 
     if len(mybases) == 1:
