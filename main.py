@@ -24,6 +24,8 @@ def identify():
 @app.route("/", methods=["POST"])
 def index():
     data = request.get_json()
+    print('gamestate json:')
+    print(data)
 
     # build config
     config_base_levels = [
