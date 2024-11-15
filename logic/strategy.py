@@ -11,9 +11,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
 
-    actions: List[PlayerAction]
-
-    actions.append(upgrade_with_overhead (mybases, gameState.config))
+    actions = get_upgrades(mybases, gameState.config)
 
     # TODO: place your logic here
     return actions
@@ -24,6 +22,7 @@ def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
     return pop_in_x_ticks
 
 def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base):
+    
     d = distance_3d(myBase.position, hostileBase.position)
     pop = project_base_pop(config, hostileBase, d)
     return units_to_send(config, d, pop + 1)
@@ -55,7 +54,10 @@ def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
 
     return upgradebase
 
-def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
+def get_self_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
+    '''
+    Alle pops über max werden in die eigene Base gesteckt
+    '''
     actions: List[PlayerAction] = []
     for base in mybases:
         if base.level < len(config.base_levels):
@@ -64,6 +66,9 @@ def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[Playe
 
 
 def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
+    '''
+    Zieht sich aus gamestate die Informationen der bases und speichert Basisinfos in die Listen mybases udn otherbases
+    '''
     mybases: List[Base] = []
     otherbases: List[Base] = []
     for base in gameState.bases:
@@ -75,31 +80,51 @@ def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
     return mybases, otherbases
 
 def get_death_rate(config: GameConfig) -> int:
+    '''
+    Holt sich death_rate(Variable, wie weit bits reisen, bis sie sterben)
+    '''
     return config.paths.death_rate
 
 def get_grace_period(config: GameConfig) -> int:
+    
     return config.paths.grace_period
 
 def get_spawn_rate(config: GameConfig, base: Base) -> int:
+    '''
+    Übergib den Namen einer Basis, returnt spawnrate der Basis
+    '''
     return config.base_levels[base.level].spawn_rate
 
 def get_max_population(config: GameConfig, base: Base) -> int:
+    '''
+    Übergib den Namen einer Basis, returnt maxPop der Basis
+    '''   
     return config.base_levels[base.level].max_population
 
 def get_upgrade_cost(config: GameConfig, base: Base) -> int:
+    '''
+    Übergib den Namen einer Basis, returnt Upgradekosten der Basis
+    '''
     return config.base_levels[base.level + 1].upgrade_cost
 
 def unit_amount_after_travel(config: GameConfig, units_sent: int, distance: int) -> int:
+    '''
+    Übergib die Menge an Units und die Distanz zm ziel. Berechnet dir die übigen Units, beim eintreffen
+    '''
     out = units_sent - get_death_rate(config) * max(distance - get_grace_period(config), 0)
     print(f"\treturn: {out}\n")
     return out
 
 def units_above_max(config: GameConfig, base:Base) -> int:
-    # does the bare minimum amount of units to send (into upgrades oder whatever)
+    '''
+    Wie viele Units sterben im nächsten tick
+    '''
     if base.population > config.base_levels[base.level].max_population:
         return base.population - config.base_levels[base.level].max_population
     return 0
 
 def distance_3d(pos1: Position, pos2: Position):
+    '''
+    Berechnet die Distanz zwischen den übergebenen Punkten, Punkt 1 und Punkt 2
+    '''
     return int(sqrt((pos1.x-pos2.x)**2+(pos1.y-pos2.y)**2+(pos1.y-pos2.y)**2))
-
