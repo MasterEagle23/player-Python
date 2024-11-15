@@ -10,6 +10,7 @@ from models.base import Base
 from models.position import Position
 from models.board_action import BoardAction
 from models.progress import Progress
+import time
 
 app = Flask(__name__)
 CORS(app)
@@ -24,6 +25,9 @@ def identify():
 @app.route("/", methods=["POST"])
 def index():
     data = request.get_json()
+
+    print('-' * 20 + f'\n{time.strftime('[%H:%M:%S]')}\ngamestate json:')
+    print(data)
 
     # build config
     config_base_levels = [
