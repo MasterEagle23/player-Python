@@ -3,7 +3,8 @@ from models.game_state import GameState
 from models.player_action import PlayerAction
 from models.base import Base
 from models.game_config import GameConfig
-
+from models.position import Position
+from math import sqrt
 
 def decide(gameState: GameState) -> List[PlayerAction]:
     # TODO: place your logic here
@@ -46,3 +47,6 @@ def units_above_max(config: GameConfig, base:Base) -> int:
     if base.population > config.base_levels[base.level].max_population:
         return base.population - config.base_levels[base.level].max_population
     return 0
+
+def distance_3d(pos1: Position, pos2: Position):
+    return sqrt((pos1.x-pos2.x)**2+(pos1.y-pos2.y)**2+(pos1.y-pos2.y)**2)
