@@ -13,7 +13,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     actions: List[PlayerAction]
 
-    actions.append(upgrade_with_overhead (mybases, gameState.config))
+    actions.append(get_upgrades(gameState.config, mybases))
 
     # TODO: place your logic here
     return actions
