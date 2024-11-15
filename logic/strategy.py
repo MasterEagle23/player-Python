@@ -1,5 +1,6 @@
 from typing import List
 from models.game_state import GameState
+from models.game_state import BoardAction
 from models.player_action import PlayerAction
 from models.base import Base
 from models.game_config import GameConfig
@@ -10,7 +11,7 @@ from math import sqrt
 def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
-
+    board_action = get_board_action(gameState)
     actions: List[PlayerAction] = []
 
     actions.append(get_upgrades(gameState.config, mybases))
@@ -81,7 +82,6 @@ def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[Playe
             actions.append(PlayerAction(base.uid, base.uid, units_above_max(config, base)))
     return actions
 
-
 def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
     '''
     Zieht sich aus gamestate die Informationen der bases und speichert Basisinfos in die Listen mybases udn otherbases
@@ -95,6 +95,14 @@ def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
             otherbases.append(base)
 
     return mybases, otherbases
+
+def get_board_action(gameState: GameState) -> List[BoardAction]:
+    '''
+    Zieht sich aus gamestate die BoardActions aller Spieler
+    '''
+    board_actions: List[BoardAction]
+    board_actions= gameState.actions
+    return board_actions
 
 def get_death_rate(config: GameConfig) -> int:
     '''
