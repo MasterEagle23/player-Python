@@ -12,9 +12,11 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
     board_action = get_board_action(gameState)
-    actions: List[PlayerAction] = []
 
     actions: List[PlayerAction] = []
+
+    if len(mybases) == 1:
+        return [do_spam_attack(gameState, mybases[0], otherbases)]
 
     actions += get_upgrades(gameState.config, mybases)
 
@@ -182,3 +184,13 @@ def closest_ally_base (current_base: Base, our_bases: List[Base]):
                 closest_ally = base
                 distance = dist_temp
     return closest_ally
+
+def do_spam_attack(config: GameConfig, srcbase: Base, otherbases: List[Base]) -> PlayerAction:
+    '''
+    spams all units exept one to spam the nearest base
+    '''
+    target: Base = closest_hostile_base(srcbase, otherbases)
+
+    attack_amount = srcbase.population - 1
+
+    return PlayerAction(srcbase.uid, target.uid, attack_amount)
