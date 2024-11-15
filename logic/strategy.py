@@ -16,8 +16,20 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     # TODO: place your logic here
     return actions
 
- 
-def get_minimum_upgrades(mybases: List[Base], config: GameConfig) -> List[PlayerAction]:
+def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
+    pop_in_x_ticks: int = base.population + get_spawn_rate(config, base) * ticks
+    pop_in_x_ticks = min(pop_in_x_ticks, get_max_population(config, base) + get_spawn_rate(config, base))
+    return pop_in_x_ticks
+
+def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base):
+    d = distance_3d(myBase.position, hostileBase.position)
+    pop = project_base_pop(config, hostileBase, d)
+    return units_to_send(config, d, pop + 1)
+
+def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: int):
+    return units_that_need_to_arrive + get_death_rate(config) * max(distance - get_grace_period(config), 0)
+
+def get_minimum_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     actions: List[PlayerAction] = []
     for base in mybases:
         if base.level < len(config.base_levels):
@@ -63,4 +75,4 @@ def units_above_max(config: GameConfig, base:Base) -> int:
     return 0
 
 def distance_3d(pos1: Position, pos2: Position):
-    return sqrt((pos1.x-pos2.x)**2+(pos1.y-pos2.y)**2+(pos1.y-pos2.y)**2)
+    return int(sqrt((pos1.x-pos2.x)**2+(pos1.y-pos2.y)**2+(pos1.y-pos2.y)**2))
