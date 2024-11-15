@@ -6,16 +6,29 @@ from models.game_config import GameConfig
 from models.position import Position
 from math import sqrt
 
+
 def decide(gameState: GameState) -> List[PlayerAction]:
+
+    mybases, otherbases = get_base_lists(gameState)
+
+    actions = get_minimum_upgrades(mybases, gameState.config)
+
     # TODO: place your logic here
-    return [PlayerAction(0, 0, 0)]
+    return actions
+
+ 
+def get_minimum_upgrades(mybases: List[Base], config: GameConfig) -> List[PlayerAction]:
+    actions: List[PlayerAction] = []
+    for base in mybases:
+        actions.append(PlayerAction(base.uid, base.uid, units_above_max(config, base)))
+    return actions
 
 
-def get_base_lists(gamestate) -> tuple[List[Base], List[Base]]:
+def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
     mybases: List[Base] = []
     otherbases: List[Base] = []
-    for base in gamestate.bases:
-        if base.player:
+    for base in gameState.bases:
+        if base.player == gameState.game.player:
             mybases.append(base)
         else:
             otherbases.append(base)
