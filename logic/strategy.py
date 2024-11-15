@@ -19,6 +19,9 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     return actions
 
 def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
+    '''
+    
+    '''
     pop_in_x_ticks: int = base.population + get_spawn_rate(config, base) * ticks
     pop_in_x_ticks = min(pop_in_x_ticks, get_max_population(config, base) + get_spawn_rate(config, base))
     return pop_in_x_ticks
