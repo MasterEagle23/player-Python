@@ -11,7 +11,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
 
-    actions = get_self_upgrades(mybases, gameState.config)
+    actions = get_upgrades(mybases, gameState.config)
 
     # TODO: place your logic here
     return actions
