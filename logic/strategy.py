@@ -11,7 +11,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
 
-    actions = get_self_upgrades(mybases, gameState.config)
+    actions = upgrade_with_overhead (mybases, gameState.config)
 
     # TODO: place your logic here
     return actions
@@ -47,7 +47,7 @@ def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
             return base
     return mybases[0]
 
-def get_self_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
+def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     actions: List[PlayerAction] = []
     for base in mybases:
         if base.level < len(config.base_levels):
@@ -94,3 +94,4 @@ def units_above_max(config: GameConfig, base:Base) -> int:
 
 def distance_3d(pos1: Position, pos2: Position):
     return int(sqrt((pos1.x-pos2.x)**2+(pos1.y-pos2.y)**2+(pos1.y-pos2.y)**2))
+
