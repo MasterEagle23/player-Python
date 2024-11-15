@@ -13,9 +13,10 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     actions: List[PlayerAction] = []
 
-    actions.append(get_upgrades(gameState.config, mybases))
+    actions += get_upgrades(gameState.config, mybases)
 
     # TODO: place your logic here
+    print(actions)
     return actions
 
 def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
