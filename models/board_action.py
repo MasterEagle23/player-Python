@@ -18,3 +18,4 @@ class BoardAction:
         self.dest: int = dest
         self.amount: int = amount
         self.progress: Progress = progress
+

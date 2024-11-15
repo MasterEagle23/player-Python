@@ -7,6 +7,7 @@ class PathConfig:
         self.death_rate = death_rate
 
 
+
 class GameConfig:
     def __init__(self, base_levels: list[BaseLevel], paths: PathConfig):
         self.base_levels: list[BaseLevel] = base_levels
