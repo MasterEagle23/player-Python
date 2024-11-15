@@ -16,7 +16,13 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     # TODO: place your logic here
     return actions
 
- 
+def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
+    pop_in_x_ticks: int = base.population + get_spawn_rate(config, base) * ticks
+    pop_in_x_ticks = min(pop_in_x_ticks, get_max_population(config, base) + get_spawn_rate(config, base))
+    return pop_in_x_ticks
+
+
+
 def get_minimum_upgrades(mybases: List[Base], config: GameConfig) -> List[PlayerAction]:
     actions: List[PlayerAction] = []
     for base in mybases:
