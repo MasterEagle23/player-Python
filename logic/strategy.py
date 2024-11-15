@@ -8,7 +8,7 @@ from models.position import Position
 from math import sqrt
 
 
-UPGRADE_GOAL = 5
+UPGRADE_GOAL = 2
 
 
 def decide(gameState: GameState) -> List[PlayerAction]:
@@ -26,11 +26,12 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     if actions == []:
         # do some attack
-        srcbase = mybases[0]
-        do_spam_attack(config, srcbase, otherbases)
+        target = closest_hostile_base(mybases[0], otherbases)
+        source = closest_ally_base(target, mybases)
+        actions.append(PlayerAction(source.uid, target.uid, source.population-1))
         for base in mybases:
-            if base != srcbase:
-                PlayerAction(base.uid, srcbase.uid, base.population - 1)
+            if base != source:
+                actions.append(PlayerAction(base.uid, source.uid, base.population - 1))
 
     return actions
 
