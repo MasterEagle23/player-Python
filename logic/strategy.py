@@ -8,7 +8,7 @@ from models.position import Position
 from math import sqrt
 
 
-UPGRADE_GOAL = 2
+UPGRADE_GOAL = 0
 
 
 def decide(gameState: GameState) -> List[PlayerAction]:
