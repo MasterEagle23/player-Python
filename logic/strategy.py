@@ -40,3 +40,9 @@ def unit_amount_after_travel(config: GameConfig, units_sent: int, distance: int)
     out = units_sent - get_death_rate(config) * max(distance - get_grace_period(config), 0)
     print(f"\treturn: {out}\n")
     return out
+
+def units_above_max(config: GameConfig, base:Base) -> int:
+    # does the bare minimum amount of units to send (into upgrades oder whatever)
+    if base.population > config.base_levels[base.level].max_population:
+        return base.population - config.base_levels[base.level].max_population
+    return 0
