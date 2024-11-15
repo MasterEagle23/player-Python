@@ -206,6 +206,13 @@ def closest_ally_base (current_base: Base, our_bases: List[Base]):
                 distance = dist_temp
     return closest_ally
 
+def find_enemies (gameState: GameState ,other_bases: List[Base]):
+    enemies: List[Base] = []
+    for base in other_bases:
+        if (0 != base.player) and (gameState.game.player != base.player):
+            enemies.append(base)
+    return enemies
+
 def do_spam_attack(config: GameConfig, srcbase: Base, otherbases: List[Base]) -> PlayerAction:
     '''
     spams all units exept one to spam the nearest base
