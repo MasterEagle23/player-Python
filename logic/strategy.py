@@ -8,7 +8,7 @@ from models.position import Position
 from math import sqrt
 
 
-UPGRADE_GOAL = 5
+UPGRADE_GOAL = 2
 
 
 def decide(gameState: GameState) -> List[PlayerAction]:
@@ -26,11 +26,12 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     if actions == []:
         # do some attack
-        srcbase = mybases[0]
-        do_spam_attack(config, srcbase, otherbases)
+        target = closest_hostile_base(mybases[0], otherbases)
+        source = closest_ally_base(target, mybases)
+        actions.append(PlayerAction(source.uid, target.uid, source.population-1))
         for base in mybases:
-            if base != srcbase:
-                PlayerAction(base.uid, srcbase.uid, base.population - 1)
+            if base != source:
+                actions.append(PlayerAction(base.uid, source.uid, base.population - 1))
 
     return actions
 
@@ -181,16 +182,16 @@ def distance_3d(pos1: Position, pos2: Position):
 
 def closest_hostile_base (our_base: Base, other_bases: List[Base] ):
     distance: int = -1
-    closest_ally: Base
+    closest_hostile: Base
     for base in other_bases:
         dist_temp: int = distance_3d(our_base.position, base.position)
         if (-1 == distance):
             distance = dist_temp
-            closest_ally = base
+            closest_hostile: Base
         elif (dist_temp < distance):
             distance = dist_temp
-            closest_ally = base
-    return closest_ally
+            closest_hostile = base
+    return closest_hostile
 
 def closest_ally_base (current_base: Base, our_bases: List[Base]):
     distance: int = -1
@@ -205,6 +206,13 @@ def closest_ally_base (current_base: Base, our_bases: List[Base]):
                 closest_ally = base
                 distance = dist_temp
     return closest_ally
+
+def find_enemies (gameState: GameState ,other_bases: List[Base]):
+    enemies: List[Base] = []
+    for base in other_bases:
+        if (0 != base.player) and (gameState.game.player != base.player):
+            enemies.append(base)
+    return enemies
 
 def do_spam_attack(config: GameConfig, srcbase: Base, otherbases: List[Base]) -> PlayerAction:
     '''
