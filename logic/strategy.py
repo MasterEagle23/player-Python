@@ -181,16 +181,16 @@ def distance_3d(pos1: Position, pos2: Position):
 
 def closest_hostile_base (our_base: Base, other_bases: List[Base] ):
     distance: int = -1
-    closest_ally: Base
+    closest_hostile: Base
     for base in other_bases:
         dist_temp: int = distance_3d(our_base.position, base.position)
         if (-1 == distance):
             distance = dist_temp
-            closest_ally = base
+            closest_hostile: Base
         elif (dist_temp < distance):
             distance = dist_temp
-            closest_ally = base
-    return closest_ally
+            closest_hostile = base
+    return closest_hostile
 
 def closest_ally_base (current_base: Base, our_bases: List[Base]):
     distance: int = -1
