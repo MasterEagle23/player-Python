@@ -22,7 +22,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     if len(mybases) == 1:
         return [do_spam_attack(gameState, mybases[0], otherbases)]
 
-    actions += get_upgrades(gameState.config, mybases)
+    actions += get_upgrades(config, mybases)
 
     if actions == []:
         # do some attack
