@@ -26,7 +26,7 @@ def identify():
 def index():
     data = request.get_json()
 
-    print('-' * 20 + f'\n{time.strftime('[%H:%M:%S]')}\ngamestate json:')
+    print('=' * 20 + f'\n{time.strftime('[%H:%M:%S]')}\ngamestate json:')
     print(data)
 
     # build config
@@ -79,8 +79,9 @@ def index():
 
     game_state = GameState(actions, bases, game_config, game)
 
-    tmp = jsonify([action.serialize() for action in decide(game_state)])
+    response = jsonify([action.serialize() for action in decide(game_state)])
 
-    print(tmp)
+    print('-' * 20 + '\nactions:')
+    print(response)
 
-    return tmp
+    return response

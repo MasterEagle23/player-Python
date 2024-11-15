@@ -8,11 +8,15 @@ from models.position import Position
 from math import sqrt
 
 
+UPGRADE_GOAL = 5
+
+
 def decide(gameState: GameState) -> List[PlayerAction]:
+
+    config: GameConfig = gameState.config
 
     mybases, otherbases = get_base_lists(gameState)
     board_action = get_board_action(gameState)
-
     actions: List[PlayerAction] = []
 
     if len(mybases) == 1:
@@ -20,7 +24,14 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     actions += get_upgrades(gameState.config, mybases)
 
-    # TODO: place your logic here
+    if actions == []:
+        # do some attack
+        srcbase = mybases[0]
+        do_spam_attack(config, srcbase, otherbases)
+        for base in mybases:
+            if base != srcbase:
+                PlayerAction(base.uid, srcbase.uid, base.population - 1)
+
     return actions
 
 def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
@@ -53,6 +64,9 @@ def get_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     # pick base to upgrade
     upgradeBase: Base = pick_upgrade_base(config, mybases)
 
+    if upgradeBase is None:
+        return []
+
     # send units to base
     actions: List[PlayerAction] = []
 
@@ -67,14 +81,10 @@ def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
     '''
     upgradebase: Base = mybases[0]
     for base in mybases:
-        if base.level < 5:
+        if base.level < UPGRADE_GOAL:
             # pick base
             return base
-        elif base.level < upgradebase.level:
-            # pick lowest base
-            upgradebase = base
-
-    return upgradebase
+    return None
 
 def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
@@ -100,13 +110,24 @@ def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
 
     return mybases, otherbases
 
-def get_board_action(gameState: GameState) -> List[BoardAction]:
-    '''
-    Zieht sich aus gamestate die BoardActions aller Spieler
-    '''
-    board_actions: List[BoardAction]
-    board_actions= gameState.actions
-    return board_actions
+
+''' pls fix this pile of shit
+def get_board_action(gameState: GameState) -> tuple[List[BoardAction], List[BoardAction]]:
+   
+    # Zieht sich aus gamestate die BoardActions von uns und von allen anderen Spielern
+   
+    my_board_actions: List[BoardAction]
+    other_board_actions= gameState.actions
+    for board_actions in gameState.actions:
+        counter=0
+        if board_actions.player == gameState.actions(counter):
+            my_board_actions.append(board_actions)
+        else:
+            other_board_actions.append(board_actions)
+        counter+=1
+        
+    return my_board_actions, other_board_actions
+'''
 
 def get_death_rate(config: GameConfig) -> int:
     '''
