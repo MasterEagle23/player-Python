@@ -20,7 +20,8 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 def get_minimum_upgrades(mybases: List[Base], config: GameConfig) -> List[PlayerAction]:
     actions: List[PlayerAction] = []
     for base in mybases:
-        actions.append(PlayerAction(base.uid, base.uid, units_above_max(config, base)))
+        if base.level < len(config.base_levels):
+            actions.append(PlayerAction(base.uid, base.uid, units_above_max(config, base)))
     return actions
 
 
