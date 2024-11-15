@@ -3,7 +3,8 @@ from models.game_state import GameState
 from models.player_action import PlayerAction
 from models.base import Base
 from models.game_config import GameConfig
-
+from models.position import Position
+from math import sqrt
 
 def decide(gameState: GameState) -> List[PlayerAction]:
     # TODO: place your logic here
@@ -40,3 +41,6 @@ def unit_amount_after_travel(config: GameConfig, units_sent: int, distance: int)
     out = units_sent - get_death_rate(config) * max(distance - get_grace_period(config), 0)
     print(f"\treturn: {out}\n")
     return out
+
+def distance_3d(pos1: Position, pos2: Position):
+    return sqrt((pos1.x-pos2.x)**2+(pos1.y-pos2.y)**2+(pos1.y-pos2.y)**2)
