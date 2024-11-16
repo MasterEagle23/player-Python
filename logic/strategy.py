@@ -115,6 +115,18 @@ def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
 
     return mybases, otherbases
 
+def get_actions_by_target_base(gamestate: GameState) -> dict:
+    '''
+    
+    '''
+    actions_by_target_base: dict
+    for action in gamestate.actions:
+        if (actions_by_target_base.get(str(action.dest)) is None):
+            actions_by_target_base[str(action.dest)] = []
+        actions_by_target_base[str(action.dest)].append(action)
+    return actions_by_target_base
+        
+
 
 def get_death_rate(config: GameConfig) -> int:
     '''
