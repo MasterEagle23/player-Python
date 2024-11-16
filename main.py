@@ -26,8 +26,9 @@ def identify():
 def index():
     data = request.get_json()
 
-    print('=' * 20 + f'\n{time.strftime("[%H:%M:%S]")}\ngamestate json:')
-    print(data)
+    print('=' * 20 + f'\n{time.strftime("[%H:%M:%S]")}')
+    # print('gamestate json:')
+    # print(data)
 
     # build config
     config_base_levels = [
@@ -85,6 +86,3 @@ def index():
     # print(response)
 
     return jsonify(response)
-
-if __name__ == '__main__':
-    app.run(host="127.0.0.1", port=8080)

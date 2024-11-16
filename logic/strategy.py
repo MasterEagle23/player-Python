@@ -26,6 +26,8 @@ SEND_THRESHOLD = 5
 
 def decide(gameState: GameState) -> List[PlayerAction]:
 
+    print(f'gameid: {gameState.game.uid}')
+
     config: GameConfig = gameState.config
 
     mybases, otherbases = get_base_lists(gameState)
@@ -183,11 +185,13 @@ def get_group_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAc
     '''
     if len(mybases) > 0:
         upgradebase: Base = mybases[0]
+        actions: List[PlayerAction] = []
         for base in mybases:
             if base.level < UPGRADE_GOAL:
-                # pick base
-                return base
-        return None
+                overflow = base.population > config.base_levels[base.level].max_population
+                if overflow > 0:
+                    actions.append(PlayerAction(base.uid, upgradebase.uid, overflow))
+        return actions
     else:
         return None
 
