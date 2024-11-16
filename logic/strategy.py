@@ -147,7 +147,7 @@ def send_support(config: GameConfig, source: Base, target: Base) -> PlayerAction
         return None
 
 def upgrade_cost(config: GameConfig, base: Base) -> int:
-    return config.base_levels[base.level].upgrade_cost - base.units_until_upgrade
+    return int(config.base_levels[base.level].upgrade_cost - base.units_until_upgrade)
 
 def project_base_pop(config: GameConfig, base: Base, ticks: int, inbound_actions: List[BoardAction]) -> int:
     '''
@@ -190,7 +190,7 @@ def get_group_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAc
             if base.level < UPGRADE_GOAL:
                 overflow = base.population > config.base_levels[base.level].max_population
                 if overflow > 0:
-                    actions.append(PlayerAction(base.uid, upgradebase.uid, overflow))
+                    actions.append(PlayerAction(base.uid, upgradebase.uid, int(overflow)))
         return actions
     else:
         return None
@@ -202,7 +202,7 @@ def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[Playe
     actions: List[PlayerAction] = []
     for base in mybases:
         if base.level < len(config.base_levels):
-            actions.append(PlayerAction(base.uid, base.uid, units_above_max(config, base)))
+            actions.append(PlayerAction(base.uid, base.uid, int(units_above_max(config, base))))
     return actions
 
 def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
@@ -323,7 +323,7 @@ def do_spam_attack(config: GameConfig, srcbase: Base, otherbases: List[Base]) ->
 
     attack_amount = srcbase.population - 1
 
-    return PlayerAction(srcbase.uid, target.uid, attack_amount)
+    return PlayerAction(srcbase.uid, target.uid, int(attack_amount))
 
 def validate_send(config: GameConfig, source: Base, target: Base, amount=0) -> PlayerAction:
     '''
@@ -337,8 +337,8 @@ def validate_send(config: GameConfig, source: Base, target: Base, amount=0) -> P
             return PlayerAction(source.uid, target.uid, source.population - 1)
     else:
         if loss <= 0:
-            return PlayerAction(source.uid, target.uid, amount)
+            return PlayerAction(source.uid, target.uid, int(amount))
         if loss  * SEND_THRESHOLD <= amount:
-            return PlayerAction(source.uid, target.uid, amount)
+            return PlayerAction(source.uid, target.uid, int(amount))
     
     return None
