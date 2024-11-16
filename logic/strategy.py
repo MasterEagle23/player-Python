@@ -9,7 +9,7 @@ from math import sqrt
 
 
 
-PLAYMODE = 1
+PLAYMODE = 0
 
 # aggressive + normal mode
 UPGRADE_GOAL = 14
