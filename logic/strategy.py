@@ -9,6 +9,9 @@ from math import sqrt
 
 
 UPGRADE_GOAL = 0
+ATTACK_THRESHOLD = 5
+PLAYMODE = 1
+
 
 
 def decide(gameState: GameState) -> List[PlayerAction]:
@@ -19,21 +22,37 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     # board_action = get_board_action(gameState)
     actions: List[PlayerAction] = []
 
-    if len(mybases) == 1:
-        return [do_spam_attack(gameState, mybases[0], otherbases)]
+    if PLAYMODE == 0:
+        # aggressive mode
+        upgradebases: List[Base] = []
 
-    actions += get_upgrades(gameState.config, mybases)
-
-    if actions == []:
-        # do some attack
-        target = closest_hostile_base(mybases[0], otherbases)
-        source = closest_ally_base(target, mybases)
-        actions.append(PlayerAction(source.uid, target.uid, source.population-1))
         for base in mybases:
-            if base != source:
-                actions.append(PlayerAction(base.uid, source.uid, base.population - 1))
+            attack = validate_attack(config, base, closest_hostile_base(base, otherbases))
+            if attack is not None:
+                actions.append(attack)
+            else:
+                upgradebases.append(base)
+        get_upgrades(config, upgradebases)
 
-    return actions
+        return actions
+    
+    else:
+        # normal mode
+        if len(mybases) == 1:
+            return [do_spam_attack(gameState, mybases[0], otherbases)]
+
+        actions += get_upgrades(config, mybases)
+
+        if actions == []:
+            # do some attack
+            target = closest_hostile_base(mybases[0], otherbases)
+            source = closest_ally_base(target, mybases)
+            actions.append(PlayerAction(source.uid, target.uid, source.population-1))
+            for base in mybases:
+                if base != source:
+                    actions.append(PlayerAction(base.uid, source.uid, base.population - 1))
+
+        return actions
 
 def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
     '''
@@ -223,3 +242,16 @@ def do_spam_attack(config: GameConfig, srcbase: Base, otherbases: List[Base]) ->
     attack_amount = srcbase.population - 1
 
     return PlayerAction(srcbase.uid, target.uid, attack_amount)
+
+def validate_attack(config: GameConfig, source: Base, target: Base) -> PlayerAction:
+    '''
+    validate and create attacks
+    '''
+    loss = (distance_3d(source.position, target.position) - config.paths.grace_period) * config.paths.death_rate
+
+    if loss <= 0:
+        return PlayerAction(source.uid, target.uid, source.population - 1)
+    if loss <= (source.population - 1) * ATTACK_THRESHOLD:
+        return PlayerAction(source.uid, target.uid, source.population - 1)
+    
+    return None
