@@ -9,9 +9,16 @@ from math import sqrt
 
 
 UPGRADE_GOAL = 14
-ATTACK_THRESHOLD = 5
 PLAYMODE = 0
+
+# oneshot mode
 ATTACK_FACTOR = 1.1
+SUPPORT_THRESHOLD = 0.3
+LOOK_AHEAD = 10
+
+# aggressive + oneshot mode
+SEND_THRESHOLD = 5
+
 
 
 def decide(gameState: GameState) -> List[PlayerAction]:
@@ -20,6 +27,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
     # board_action = get_board_action(gameState)
+    boardactions: dict[str: List[BoardAction]] = get_actions_by_target_base(gameState)
     actions: List[PlayerAction] = []
 
     if PLAYMODE == 0:
@@ -27,7 +35,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
         upgradebases: List[Base] = []
 
         for base in mybases:
-            attack = validate_attack(config, base, closest_hostile_base(base, otherbases))
+            attack = validate_send(config, base, closest_hostile_base(base, otherbases))
             if attack is not None:
                 actions.append(attack)
             else:
@@ -37,12 +45,14 @@ def decide(gameState: GameState) -> List[PlayerAction]:
         return actions
     
     elif PLAYMODE == 1:
-        # advanced mode
+        # oneshot mode
         if len(mybases == 1):
             source = mybases[0]
             for target in otherbases:
-                if source.population > int(units_needed_to_defeat_base_from_base(config, target, source) * ATTACK_FACTOR):
-                    return PlayerAction(source.uid, target.uid, int(units_needed_to_defeat_base_from_base(config, target, source) * ATTACK_FACTOR))
+                # try to oneshot base
+                attack = oneshot(config, source, target, boardactions.get(str(target.uid)))
+                if attack is not None:
+                    return [attack]
                 return valid_upgrade(config, source)
             return []
         
@@ -53,6 +63,29 @@ def decide(gameState: GameState) -> List[PlayerAction]:
                 actions.append(upgrade)
                 left_bases.pop(base)
         
+        if len(left_bases) == 0:
+            # nothing left to do
+            return actions
+        
+        target = closest_hostile_base(left_bases[0], otherbases)
+        source = closest_ally_base(target, left_bases)
+
+        attack = oneshot(config, source, target, boardactions.get(str(target.uid)))
+
+        if attack is not None:
+            actions.append(attack)
+            return actions
+        
+        left_bases.pop(source)
+        
+        for base in left_bases:
+            if project_base_pop(config, base, LOOK_AHEAD, boardactions.get(str(target.uid))) > base.population - int(config.base_levels[base.level].max_population * SUPPORT_THRESHOLD):
+                # projected pop > support threshold
+                support = send_support(config, base, source)
+                if support is not None:
+                    actions.append(support)
+        
+        return actions
 
     else:
         # normal mode
@@ -72,10 +105,23 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
         return actions
     
+def oneshot(config: GameConfig, source: Base, target: Base, inbound_actions: List[BoardAction]) -> PlayerAction:
+    units_needed = int(units_needed_to_defeat_base_from_base(config, target, source, inbound_actions)) * ATTACK_FACTOR
+    if source.population > units_needed:
+        return PlayerAction(source.uid, target.uid, units_needed)
+    return None
+    
 def valid_upgrade(config: GameConfig, base: Base) -> PlayerAction:
     if base.population >= upgrade_cost(config, base) and base.level < len(config.base_levels) - 1:
         return PlayerAction(base.uid, base.uid, config.base_levels[base.level].upgrade_cost)
     return None
+
+def send_support(config: GameConfig, source: Base, target: Base) -> PlayerAction:
+    leftover = source.population - int(config.base_levels[source.level].max_population * SUPPORT_THRESHOLD)
+    if leftover > 0:
+        return validate_send(config, source, target, leftover)
+    else:
+        return None
 
 def upgrade_cost(config: GameConfig, base: Base) -> int:
     return config.base_levels[base.level].upgrade_cost - base.units_until_upgrade
@@ -94,7 +140,7 @@ def project_base_pop(config: GameConfig, base: Base, ticks: int, inbound_actions
             else:
                 pop_in_x_ticks -= action.amount
 
-    return pop_in_x_ticks
+    return abs(pop_in_x_ticks)
 
 def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base, hostile_base_inbound_actions: List[BoardAction]) -> int: 
     '''
@@ -254,15 +300,20 @@ def do_spam_attack(config: GameConfig, srcbase: Base, otherbases: List[Base]) ->
 
     return PlayerAction(srcbase.uid, target.uid, attack_amount)
 
-def validate_attack(config: GameConfig, source: Base, target: Base) -> PlayerAction:
+def validate_send(config: GameConfig, source: Base, target: Base, amount=0) -> PlayerAction:
     '''
     validate and create attacks
     '''
     loss = (distance_3d(source.position, target.position) - config.paths.grace_period) * config.paths.death_rate
-
-    if loss <= 0:
-        return PlayerAction(source.uid, target.uid, source.population - 1)
-    if loss <= (source.population - 1) * ATTACK_THRESHOLD:
-        return PlayerAction(source.uid, target.uid, source.population - 1)
+    if amount == 0:
+        if loss <= 0:
+            return PlayerAction(source.uid, target.uid, source.population - 1)
+        if loss  * SEND_THRESHOLD <= (source.population - 1):
+            return PlayerAction(source.uid, target.uid, source.population - 1)
+    else:
+        if loss <= 0:
+            return PlayerAction(source.uid, target.uid, amount)
+        if loss  * SEND_THRESHOLD <= amount:
+            return PlayerAction(source.uid, target.uid, amount)
     
     return None
