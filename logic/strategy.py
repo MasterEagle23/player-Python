@@ -8,9 +8,9 @@ from models.position import Position
 from math import sqrt
 
 
-UPGRADE_GOAL = 2
+UPGRADE_GOAL = 14
 ATTACK_THRESHOLD = 5
-PLAYMODE = 1
+PLAYMODE = 0
 
 
 
@@ -32,7 +32,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
                 actions.append(attack)
             else:
                 upgradebases.append(base)
-        get_upgrades(config, upgradebases)
+        actions += get_upgrades(config, upgradebases)
 
         return actions
     
@@ -99,12 +99,15 @@ def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
     '''
     Entscheidet welche Base gerade geupgraded werden soll
     '''
-    upgradebase: Base = mybases[0]
-    for base in mybases:
-        if base.level < UPGRADE_GOAL:
-            # pick base
-            return base
-    return None
+    if len(mybases) > 0:
+        upgradebase: Base = mybases[0]
+        for base in mybases:
+            if base.level < UPGRADE_GOAL:
+                # pick base
+                return base
+        return None
+    else:
+        return None
 
 def upgrade_with_overhead(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
