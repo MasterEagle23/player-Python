@@ -286,7 +286,7 @@ def distance_3d(pos1: Position, pos2: Position):
 
 def closest_hostile_base (our_base: Base, other_bases: List[Base] ):
     distance: int = -1
-    closest_hostile: Base
+    closest_hostile: Base = other_bases[0]
     for base in other_bases:
         dist_temp: int = distance_3d(our_base.position, base.position)
         if ((-1 == distance) or (dist_temp < distance)):
@@ -296,7 +296,7 @@ def closest_hostile_base (our_base: Base, other_bases: List[Base] ):
 
 def closest_ally_base (current_base: Base, our_bases: List[Base]):
     distance: int = -1
-    closest_ally: Base
+    closest_ally: Base = our_bases[0]
     for base in our_bases:
         dist_temp: int = distance_3d(current_base.position, base.position)
         if (-1 == distance):
