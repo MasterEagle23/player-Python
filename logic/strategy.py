@@ -80,20 +80,28 @@ def valid_upgrade(config: GameConfig, base: Base) -> PlayerAction:
 def upgrade_cost(config: GameConfig, base: Base) -> int:
     return config.base_levels[base.level].upgrade_cost - base.units_until_upgrade
 
-def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
+def project_base_pop(config: GameConfig, base: Base, ticks: int, inbound_actions: List[BoardAction]) -> int:
     '''
     
     '''
     pop_in_x_ticks: int = base.population + get_spawn_rate(config, base) * ticks
     pop_in_x_ticks = min(pop_in_x_ticks, get_max_population(config, base) + get_spawn_rate(config, base))
+
+    for action in inbound_actions:
+        if (action.progress.distance - action.progress.traveled) <= ticks:
+            if action.player == base.player:
+                pop_in_x_ticks += action.amount
+            else:
+                pop_in_x_ticks -= action.amount
+
     return pop_in_x_ticks
 
-def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base) -> int: 
+def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base, hostile_base_inbound_actions: List[BoardAction]) -> int: 
     '''
     Übergib gegnerbasis und eigene basis. Berechnet, wie viele Units gebraucht werden um die Basis mit +1 Pop einzunehmen.
     '''
     d = distance_3d(myBase.position, hostileBase.position)
-    pop = project_base_pop(config, hostileBase, d)
+    pop = project_base_pop(config, hostileBase, d, hostile_base_inbound_actions)
     return units_to_send(config, d, pop + 1)
 
 def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: int) -> int:
@@ -105,25 +113,6 @@ def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: 
 def get_group_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
     Picks all units and sends all overflowing units to that base.
-    '''
-    
-    # pick base to upgrade
-    upgradeBase: Base = pick_upgrade_base(config, mybases)
-
-    if upgradeBase is None:
-        return []
-
-    # send units to base
-    actions: List[PlayerAction] = []
-
-    for base in mybases:
-        actions.append(PlayerAction(base.uid, upgradeBase.uid, units_above_max(config, base)))
-
-    return actions
-
-def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
-    '''
-    Entscheidet welche Base gerade geupgraded werden soll
     '''
     if len(mybases) > 0:
         upgradebase: Base = mybases[0]
@@ -159,24 +148,18 @@ def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
 
     return mybases, otherbases
 
-
-''' pls fix this pile of shit
-def get_board_action(gameState: GameState) -> tuple[List[BoardAction], List[BoardAction]]:
-   
-    # Zieht sich aus gamestate die BoardActions von uns und von allen anderen Spielern
-   
-    my_board_actions: List[BoardAction]
-    other_board_actions= gameState.actions
-    for board_actions in gameState.actions:
-        counter=0
-        if board_actions.player == gameState.actions(counter):
-            my_board_actions.append(board_actions)
-        else:
-            other_board_actions.append(board_actions)
-        counter+=1
+def get_actions_by_target_base(gamestate: GameState) -> dict:
+    '''
+    
+    '''
+    actions_by_target_base: dict
+    for action in gamestate.actions:
+        if (actions_by_target_base.get(str(action.dest)) is None):
+            actions_by_target_base[str(action.dest)] = []
+        actions_by_target_base[str(action.dest)].append(action)
+    return actions_by_target_base
         
-    return my_board_actions, other_board_actions
-'''
+
 
 def get_death_rate(config: GameConfig) -> int:
     '''
@@ -192,6 +175,8 @@ def get_spawn_rate(config: GameConfig, base: Base) -> int:
     '''
     Übergib den Namen einer Basis, returnt spawnrate der Basis
     '''
+    if (base.player == 0):
+        return 0
     return config.base_levels[base.level].spawn_rate
 
 def get_max_population(config: GameConfig, base: Base) -> int:
