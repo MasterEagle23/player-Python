@@ -8,9 +8,9 @@ from models.position import Position
 from math import sqrt
 
 
-UPGRADE_GOAL = 14
+UPGRADE_GOAL = 0
 ATTACK_THRESHOLD = 5
-PLAYMODE = 0
+PLAYMODE = 1
 
 
 def decide(gameState: GameState) -> List[PlayerAction]:
