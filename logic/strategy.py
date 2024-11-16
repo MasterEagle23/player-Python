@@ -27,6 +27,7 @@ SEND_THRESHOLD = 5
 def decide(gameState: GameState) -> List[PlayerAction]:
 
     print(f'gameid: {gameState.game.uid}')
+    print(f'ticks: {gameState.game.tick}')
 
     config: GameConfig = gameState.config
 
