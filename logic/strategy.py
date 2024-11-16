@@ -32,26 +32,34 @@ def decide(gameState: GameState) -> List[PlayerAction]:
                 actions.append(attack)
             else:
                 upgradebases.append(base)
-        actions += get_basic_upgrades(config, upgradebases)
+        actions += get_group_upgrades(config, upgradebases)
 
         return actions
     
     elif PLAYMODE == 1:
         # advanced mode
-        pass
         if len(mybases == 1):
             source = mybases[0]
             for target in otherbases:
                 if source.population > int(units_needed_to_defeat_base_from_base(config, target, source) * ATTACK_FACTOR):
                     return PlayerAction(source.uid, target.uid, int(units_needed_to_defeat_base_from_base(config, target, source) * ATTACK_FACTOR))
-                return get_upgrades(config, mybases)
+                return valid_upgrade(config, source)
+            return []
+        
+        left_bases = mybases
+        for base in left_bases:
+            upgrade = valid_upgrade(config, base)
+            if upgrade is not None:
+                actions.append(upgrade)
+                left_bases.pop(base)
+        
 
     else:
         # normal mode
         if len(mybases) == 1:
             return [do_spam_attack(gameState, mybases[0], otherbases)]
 
-        actions += get_basic_upgrades(config, mybases)
+        actions += get_group_upgrades(config, mybases)
 
         if actions == []:
             # do some attack
@@ -64,8 +72,13 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
         return actions
     
-def get_upgrades(config: GameConfig, base: Base) -> PlayerAction:
-    pass
+def valid_upgrade(config: GameConfig, base: Base) -> PlayerAction:
+    if base.population >= upgrade_cost(config, base) and base.level < len(config.base_levels) - 1:
+        return PlayerAction(base.uid, base.uid, config.base_levels[base.level].upgrade_cost)
+    return None
+
+def upgrade_cost(config: GameConfig, base: Base) -> int:
+    return config.base_levels[base.level].upgrade_cost - base.units_until_upgrade
 
 def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
     '''
@@ -89,7 +102,7 @@ def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: 
     '''
     return units_that_need_to_arrive + get_death_rate(config) * max(distance - get_grace_period(config), 0)
 
-def get_basic_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
+def get_group_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
     Picks all units and sends all overflowing units to that base.
     '''
