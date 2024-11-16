@@ -8,9 +8,9 @@ from models.position import Position
 from math import sqrt
 
 
-UPGRADE_GOAL = 0
+UPGRADE_GOAL = 14
 ATTACK_THRESHOLD = 5
-PLAYMODE = 1
+PLAYMODE = 0
 
 
 
