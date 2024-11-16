@@ -33,7 +33,11 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     boardactions: dict[str: List[BoardAction]] = get_actions_by_target_base(gameState)
     actions: List[PlayerAction] = []
 
-    if PLAYMODE == 0:
+    playmode = 0
+    if gameState.game.tick > len(gameState.bases):
+        playmode = 1
+
+    if playmode == 0:
         # aggressive mode
         upgradebases: List[Base] = []
 
@@ -49,7 +53,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
         return actions
     
-    elif PLAYMODE == 1:
+    elif playmode == 1:
         # oneshot mode
         if len(mybases) == 1:
             source = mybases[0]
