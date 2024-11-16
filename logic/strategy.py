@@ -14,7 +14,6 @@ PLAYMODE = 0
 ATTACK_FACTOR = 1.1
 
 
-
 def decide(gameState: GameState) -> List[PlayerAction]:
 
     config: GameConfig = gameState.config
