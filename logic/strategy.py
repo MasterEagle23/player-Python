@@ -69,7 +69,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
             upgrade = valid_upgrade(config, base)
             if upgrade is not None:
                 actions.append(upgrade)
-                left_bases.pop(base)
+                left_bases.pop(left_bases.index(base))
         
         if len(left_bases) == 0:
             # nothing left to do
@@ -87,7 +87,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
             actions.append(attack)
             return actions
         
-        left_bases.pop(source)
+        left_bases.pop(left_bases.index(source))
         
         for base in left_bases:
             b_acts = boardactions.get(str(target.uid))
