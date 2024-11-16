@@ -11,6 +11,7 @@ from math import sqrt
 UPGRADE_GOAL = 14
 ATTACK_THRESHOLD = 5
 PLAYMODE = 0
+ATTACK_FACTOR = 1.1
 
 
 
@@ -32,16 +33,26 @@ def decide(gameState: GameState) -> List[PlayerAction]:
                 actions.append(attack)
             else:
                 upgradebases.append(base)
-        actions += get_upgrades(config, upgradebases)
+        actions += get_basic_upgrades(config, upgradebases)
 
         return actions
     
+    elif PLAYMODE == 1:
+        # advanced mode
+        pass
+        if len(mybases == 1):
+            source = mybases[0]
+            for target in otherbases:
+                if source.population > int(units_needed_to_defeat_base_from_base(config, target, source) * ATTACK_FACTOR):
+                    return PlayerAction(source.uid, target.uid, int(units_needed_to_defeat_base_from_base(config, target, source) * ATTACK_FACTOR))
+                return get_upgrades(config, mybases)
+
     else:
         # normal mode
         if len(mybases) == 1:
             return [do_spam_attack(gameState, mybases[0], otherbases)]
 
-        actions += get_upgrades(config, mybases)
+        actions += get_basic_upgrades(config, mybases)
 
         if actions == []:
             # do some attack
@@ -53,6 +64,9 @@ def decide(gameState: GameState) -> List[PlayerAction]:
                     actions.append(PlayerAction(base.uid, source.uid, base.population - 1))
 
         return actions
+    
+def get_upgrades(config: GameConfig, base: Base) -> PlayerAction:
+    pass
 
 def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
     '''
@@ -76,7 +90,7 @@ def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: 
     '''
     return units_that_need_to_arrive + get_death_rate(config) * max(distance - get_grace_period(config), 0)
 
-def get_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
+def get_basic_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
     Picks all units and sends all overflowing units to that base.
     '''
