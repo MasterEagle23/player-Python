@@ -13,6 +13,7 @@ ATTACK_THRESHOLD = 5
 PLAYMODE = 1
 
 
+
 def decide(gameState: GameState) -> List[PlayerAction]:
 
     config: GameConfig = gameState.config

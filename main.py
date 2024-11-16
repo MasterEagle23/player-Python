@@ -79,9 +79,9 @@ def index():
 
     game_state = GameState(actions, bases, game_config, game)
 
-    response = jsonify([action.serialize() for action in decide(game_state)])
+    response = [action.serialize() for action in decide(game_state)]
 
     print('-' * 20 + '\nactions:')
     print(response)
 
-    return response
+    return jsonify(response)
