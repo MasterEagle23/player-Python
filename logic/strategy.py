@@ -39,7 +39,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     actions: List[PlayerAction] = []
 
     playmode = 0
-    if gameState.game.tick > (1.01 ** len(gameState.bases)) * 100 - 100:
+    if gameState.game.tick > len(gameState.bases):
         playmode = 1
 
     if playmode == 0:
