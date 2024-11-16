@@ -35,7 +35,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     boardactions: dict[str: List[BoardAction]] = get_actions_by_target_base(gameState)
     actions: List[PlayerAction] = []
 
-    playmode = 1
+    playmode = 0
     if gameState.game.tick > len(gameState.bases):
         playmode = 1
 
