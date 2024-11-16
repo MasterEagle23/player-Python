@@ -116,24 +116,6 @@ def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
     return mybases, otherbases
 
 
-''' pls fix this pile of shit
-def get_board_action(gameState: GameState) -> tuple[List[BoardAction], List[BoardAction]]:
-   
-    # Zieht sich aus gamestate die BoardActions von uns und von allen anderen Spielern
-   
-    my_board_actions: List[BoardAction]
-    other_board_actions= gameState.actions
-    for board_actions in gameState.actions:
-        counter=0
-        if board_actions.player == gameState.actions(counter):
-            my_board_actions.append(board_actions)
-        else:
-            other_board_actions.append(board_actions)
-        counter+=1
-        
-    return my_board_actions, other_board_actions
-'''
-
 def get_death_rate(config: GameConfig) -> int:
     '''
     Holt sich death_rate(Variable, wie weit bits reisen, bis sie sterben)
