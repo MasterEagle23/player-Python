@@ -80,25 +80,7 @@ def get_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
     Picks all units and sends all overflowing units to that base.
     '''
-    
-    # pick base to upgrade
-    upgradeBase: Base = pick_upgrade_base(config, mybases)
-
-    if upgradeBase is None:
-        return []
-
-    # send units to base
-    actions: List[PlayerAction] = []
-
-    for base in mybases:
-        actions.append(PlayerAction(base.uid, upgradeBase.uid, units_above_max(config, base)))
-
-    return actions
-
-def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
-    '''
-    Entscheidet welche Base gerade geupgraded werden soll
-    '''
+    urwald-player-5ff88f9b4b-zzmrj
     if len(mybases) > 0:
         upgradebase: Base = mybases[0]
         for base in mybases:
@@ -166,6 +148,8 @@ def get_spawn_rate(config: GameConfig, base: Base) -> int:
     '''
     Übergib den Namen einer Basis, returnt spawnrate der Basis
     '''
+    if (base.player == 0):
+        return 0
     return config.base_levels[base.level].spawn_rate
 
 def get_max_population(config: GameConfig, base: Base) -> int:
