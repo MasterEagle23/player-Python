@@ -129,7 +129,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
         return actions
     
 def oneshot(config: GameConfig, source: Base, target: Base, inbound_actions: List[BoardAction]) -> PlayerAction:
-    units_needed = int(units_needed_to_defeat_base_from_base(config, target, source, inbound_actions)) * ATTACK_FACTOR
+    units_needed = int(units_needed_to_defeat_base_from_base(config, target, source, inbound_actions) * ATTACK_FACTOR)
     if source.population > units_needed:
         return PlayerAction(source.uid, target.uid, units_needed)
     return None
