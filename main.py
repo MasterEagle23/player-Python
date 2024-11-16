@@ -26,7 +26,7 @@ def identify():
 def index():
     data = request.get_json()
 
-    print('=' * 20 + f'\n{time.strftime('[%H:%M:%S]')}\ngamestate json:')
+    print('=' * 20 + f'\n{time.strftime("[%H:%M:%S]")}\ngamestate json:')
     print(data)
 
     # build config

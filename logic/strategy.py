@@ -8,8 +8,11 @@ from models.position import Position
 from math import sqrt
 
 
+
+PLAYMODE = 1
+
+# aggressive + normal mode
 UPGRADE_GOAL = 14
-PLAYMODE = 0
 
 # oneshot mode
 ATTACK_FACTOR = 1.1
@@ -46,11 +49,14 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     
     elif PLAYMODE == 1:
         # oneshot mode
-        if len(mybases == 1):
+        if len(mybases) == 1:
             source = mybases[0]
             for target in otherbases:
                 # try to oneshot base
-                attack = oneshot(config, source, target, boardactions.get(str(target.uid)))
+                b_acts = boardactions.get(str(target.uid))
+                if b_acts is None:
+                    b_acts = []
+                attack = oneshot(config, source, target, b_acts)
                 if attack is not None:
                     return [attack]
                 return valid_upgrade(config, source)
@@ -70,7 +76,10 @@ def decide(gameState: GameState) -> List[PlayerAction]:
         target = closest_hostile_base(left_bases[0], otherbases)
         source = closest_ally_base(target, left_bases)
 
-        attack = oneshot(config, source, target, boardactions.get(str(target.uid)))
+        b_acts = boardactions.get(str(target.uid))
+        if b_acts is None:
+            b_acts = []
+        attack = oneshot(config, source, target, b_acts)
 
         if attack is not None:
             actions.append(attack)
@@ -79,7 +88,10 @@ def decide(gameState: GameState) -> List[PlayerAction]:
         left_bases.pop(source)
         
         for base in left_bases:
-            if project_base_pop(config, base, LOOK_AHEAD, boardactions.get(str(target.uid))) > base.population - int(config.base_levels[base.level].max_population * SUPPORT_THRESHOLD):
+            b_acts = boardactions.get(str(target.uid))
+            if b_acts is None:
+                b_acts = []
+            if project_base_pop(config, base, LOOK_AHEAD, b_acts) > base.population - int(config.base_levels[base.level].max_population * SUPPORT_THRESHOLD):
                 # projected pop > support threshold
                 support = send_support(config, base, source)
                 if support is not None:
@@ -198,7 +210,7 @@ def get_actions_by_target_base(gamestate: GameState) -> dict:
     '''
     
     '''
-    actions_by_target_base: dict
+    actions_by_target_base: dict = {}
     for action in gamestate.actions:
         if (actions_by_target_base.get(str(action.dest)) is None):
             actions_by_target_base[str(action.dest)] = []
