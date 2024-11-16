@@ -54,20 +54,28 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
         return actions
 
-def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
+def project_base_pop(config: GameConfig, base: Base, ticks: int, inbound_actions: List[BoardAction]) -> int:
     '''
     
     '''
     pop_in_x_ticks: int = base.population + get_spawn_rate(config, base) * ticks
     pop_in_x_ticks = min(pop_in_x_ticks, get_max_population(config, base) + get_spawn_rate(config, base))
+
+    for action in inbound_actions:
+        if (action.progress.distance - action.progress.traveled) <= ticks:
+            if action.player == base.player:
+                pop_in_x_ticks += action.amount
+            else:
+                pop_in_x_ticks -= action.amount
+
     return pop_in_x_ticks
 
-def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base) -> int: 
+def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base, hostile_base_inbound_actions: List[BoardAction]) -> int: 
     '''
     Übergib gegnerbasis und eigene basis. Berechnet, wie viele Units gebraucht werden um die Basis mit +1 Pop einzunehmen.
     '''
     d = distance_3d(myBase.position, hostileBase.position)
-    pop = project_base_pop(config, hostileBase, d)
+    pop = project_base_pop(config, hostileBase, d, hostile_base_inbound_actions)
     return units_to_send(config, d, pop + 1)
 
 def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: int) -> int:
