@@ -9,7 +9,7 @@ from math import sqrt
 
 
 
-PLAYMODE = 0
+PLAYMODE = 1
 
 # aggressive + normal mode
 UPGRADE_GOAL = 14
@@ -43,7 +43,9 @@ def decide(gameState: GameState) -> List[PlayerAction]:
                 actions.append(attack)
             else:
                 upgradebases.append(base)
-        actions += get_group_upgrades(config, upgradebases)
+        temp = get_group_upgrades(config, upgradebases)
+        if temp is not None:
+            actions += temp
 
         return actions
     
