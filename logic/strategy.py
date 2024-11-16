@@ -61,9 +61,10 @@ def decide(gameState: GameState) -> List[PlayerAction]:
                 attack = oneshot(config, source, target, b_acts)
                 if attack is not None:
                     return [attack]
-                return valid_upgrade(config, source)
+                return [valid_upgrade(config, source)]
             return []
         
+        # more than one base
         left_bases = mybases
         for base in left_bases:
             upgrade = valid_upgrade(config, base)
