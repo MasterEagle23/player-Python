@@ -32,6 +32,8 @@ def decide(gameState: GameState) -> List[PlayerAction]:
     config: GameConfig = gameState.config
 
     mybases, otherbases = get_base_lists(gameState)
+    if len(otherbases) == 0:
+        return []
     # board_action = get_board_action(gameState)
     boardactions: dict[str: List[BoardAction]] = get_actions_by_target_base(gameState)
     actions: List[PlayerAction] = []
@@ -81,7 +83,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
                 actions.append(upgrade)
                 left_bases.pop(left_bases.index(base))
         
-        if len(left_bases) == 0:
+        if len(left_bases) <= 1:
             # nothing left to do
             return actions
         
