@@ -80,7 +80,6 @@ def get_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
     Picks all units and sends all overflowing units to that base.
     '''
-    urwald-player-5ff88f9b4b-zzmrj
     if len(mybases) > 0:
         upgradebase: Base = mybases[0]
         for base in mybases:
