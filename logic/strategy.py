@@ -207,10 +207,7 @@ def closest_hostile_base (our_base: Base, other_bases: List[Base] ):
     closest_hostile: Base
     for base in other_bases:
         dist_temp: int = distance_3d(our_base.position, base.position)
-        if (-1 == distance):
-            distance = dist_temp
-            closest_hostile: Base
-        elif (dist_temp < distance):
+        if ((-1 == distance) or (dist_temp < distance)):
             distance = dist_temp
             closest_hostile = base
     return closest_hostile
