@@ -8,10 +8,20 @@ from models.position import Position
 from math import sqrt
 
 
+
+PLAYMODE = 1
+
+# aggressive + normal mode
 UPGRADE_GOAL = 14
-ATTACK_THRESHOLD = 5
-PLAYMODE = 0
+
+# oneshot mode
 ATTACK_FACTOR = 1.1
+SUPPORT_THRESHOLD = 0.3
+LOOK_AHEAD = 10
+
+# aggressive + oneshot mode
+SEND_THRESHOLD = 5
+
 
 
 def decide(gameState: GameState) -> List[PlayerAction]:
@@ -20,6 +30,7 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
     mybases, otherbases = get_base_lists(gameState)
     # board_action = get_board_action(gameState)
+    boardactions: dict[str: List[BoardAction]] = get_actions_by_target_base(gameState)
     actions: List[PlayerAction] = []
 
     if PLAYMODE == 0:
@@ -27,31 +38,73 @@ def decide(gameState: GameState) -> List[PlayerAction]:
         upgradebases: List[Base] = []
 
         for base in mybases:
-            attack = validate_attack(config, base, closest_hostile_base(base, otherbases))
+            attack = validate_send(config, base, closest_hostile_base(base, otherbases))
             if attack is not None:
                 actions.append(attack)
             else:
                 upgradebases.append(base)
-        actions += get_basic_upgrades(config, upgradebases)
+        actions += get_group_upgrades(config, upgradebases)
 
         return actions
     
     elif PLAYMODE == 1:
-        # advanced mode
-        pass
-        if len(mybases == 1):
+        # oneshot mode
+        if len(mybases) == 1:
             source = mybases[0]
             for target in otherbases:
-                if source.population > int(units_needed_to_defeat_base_from_base(config, target, source) * ATTACK_FACTOR):
-                    return PlayerAction(source.uid, target.uid, int(units_needed_to_defeat_base_from_base(config, target, source) * ATTACK_FACTOR))
-                return get_upgrades(config, mybases)
+                # try to oneshot base
+                b_acts = boardactions.get(str(target.uid))
+                if b_acts is None:
+                    b_acts = []
+                attack = oneshot(config, source, target, b_acts)
+                if attack is not None:
+                    return [attack]
+                return valid_upgrade(config, source)
+            return []
+        
+        left_bases = mybases
+        for base in left_bases:
+            upgrade = valid_upgrade(config, base)
+            if upgrade is not None:
+                actions.append(upgrade)
+                left_bases.pop(base)
+        
+        if len(left_bases) == 0:
+            # nothing left to do
+            return actions
+        
+        target = closest_hostile_base(left_bases[0], otherbases)
+        source = closest_ally_base(target, left_bases)
+
+        b_acts = boardactions.get(str(target.uid))
+        if b_acts is None:
+            b_acts = []
+        attack = oneshot(config, source, target, b_acts)
+
+        if attack is not None:
+            actions.append(attack)
+            return actions
+        
+        left_bases.pop(source)
+        
+        for base in left_bases:
+            b_acts = boardactions.get(str(target.uid))
+            if b_acts is None:
+                b_acts = []
+            if project_base_pop(config, base, LOOK_AHEAD, b_acts) > base.population - int(config.base_levels[base.level].max_population * SUPPORT_THRESHOLD):
+                # projected pop > support threshold
+                support = send_support(config, base, source)
+                if support is not None:
+                    actions.append(support)
+        
+        return actions
 
     else:
         # normal mode
         if len(mybases) == 1:
             return [do_spam_attack(gameState, mybases[0], otherbases)]
 
-        actions += get_basic_upgrades(config, mybases)
+        actions += get_group_upgrades(config, mybases)
 
         if actions == []:
             # do some attack
@@ -64,23 +117,49 @@ def decide(gameState: GameState) -> List[PlayerAction]:
 
         return actions
     
-def get_upgrades(config: GameConfig, base: Base) -> PlayerAction:
-    pass
+def oneshot(config: GameConfig, source: Base, target: Base, inbound_actions: List[BoardAction]) -> PlayerAction:
+    units_needed = int(units_needed_to_defeat_base_from_base(config, target, source, inbound_actions)) * ATTACK_FACTOR
+    if source.population > units_needed:
+        return PlayerAction(source.uid, target.uid, units_needed)
+    return None
+    
+def valid_upgrade(config: GameConfig, base: Base) -> PlayerAction:
+    if base.population >= upgrade_cost(config, base) and base.level < len(config.base_levels) - 1:
+        return PlayerAction(base.uid, base.uid, config.base_levels[base.level].upgrade_cost)
+    return None
 
-def project_base_pop(config: GameConfig, base: Base, ticks: int) -> int:
+def send_support(config: GameConfig, source: Base, target: Base) -> PlayerAction:
+    leftover = source.population - int(config.base_levels[source.level].max_population * SUPPORT_THRESHOLD)
+    if leftover > 0:
+        return validate_send(config, source, target, leftover)
+    else:
+        return None
+
+def upgrade_cost(config: GameConfig, base: Base) -> int:
+    return config.base_levels[base.level].upgrade_cost - base.units_until_upgrade
+
+def project_base_pop(config: GameConfig, base: Base, ticks: int, inbound_actions: List[BoardAction]) -> int:
     '''
     
     '''
     pop_in_x_ticks: int = base.population + get_spawn_rate(config, base) * ticks
     pop_in_x_ticks = min(pop_in_x_ticks, get_max_population(config, base) + get_spawn_rate(config, base))
-    return pop_in_x_ticks
 
-def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base) -> int: 
+    for action in inbound_actions:
+        if (action.progress.distance - action.progress.traveled) <= ticks:
+            if action.player == base.player:
+                pop_in_x_ticks += action.amount
+            else:
+                pop_in_x_ticks -= action.amount
+
+    return abs(pop_in_x_ticks)
+
+def units_needed_to_defeat_base_from_base(config: GameConfig, hostileBase: Base, myBase: Base, hostile_base_inbound_actions: List[BoardAction]) -> int: 
     '''
     Übergib gegnerbasis und eigene basis. Berechnet, wie viele Units gebraucht werden um die Basis mit +1 Pop einzunehmen.
     '''
     d = distance_3d(myBase.position, hostileBase.position)
-    pop = project_base_pop(config, hostileBase, d)
+    pop = project_base_pop(config, hostileBase, d, hostile_base_inbound_actions)
     return units_to_send(config, d, pop + 1)
 
 def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: int) -> int:
@@ -89,28 +168,9 @@ def units_to_send(config: GameConfig, distance: int, units_that_need_to_arrive: 
     '''
     return units_that_need_to_arrive + get_death_rate(config) * max(distance - get_grace_period(config), 0)
 
-def get_basic_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
+def get_group_upgrades(config: GameConfig, mybases: List[Base]) -> List[PlayerAction]:
     '''
     Picks all units and sends all overflowing units to that base.
-    '''
-    
-    # pick base to upgrade
-    upgradeBase: Base = pick_upgrade_base(config, mybases)
-
-    if upgradeBase is None:
-        return []
-
-    # send units to base
-    actions: List[PlayerAction] = []
-
-    for base in mybases:
-        actions.append(PlayerAction(base.uid, upgradeBase.uid, units_above_max(config, base)))
-
-    return actions
-
-def pick_upgrade_base(config: GameConfig, mybases: List[Base]) -> Base:
-    '''
-    Entscheidet welche Base gerade geupgraded werden soll
     '''
     if len(mybases) > 0:
         upgradebase: Base = mybases[0]
@@ -146,24 +206,18 @@ def get_base_lists(gameState: GameState) -> tuple[List[Base], List[Base]]:
 
     return mybases, otherbases
 
-
-''' pls fix this pile of shit
-def get_board_action(gameState: GameState) -> tuple[List[BoardAction], List[BoardAction]]:
-   
-    # Zieht sich aus gamestate die BoardActions von uns und von allen anderen Spielern
-   
-    my_board_actions: List[BoardAction]
-    other_board_actions= gameState.actions
-    for board_actions in gameState.actions:
-        counter=0
-        if board_actions.player == gameState.actions(counter):
-            my_board_actions.append(board_actions)
-        else:
-            other_board_actions.append(board_actions)
-        counter+=1
+def get_actions_by_target_base(gamestate: GameState) -> dict:
+    '''
+    
+    '''
+    actions_by_target_base: dict = {}
+    for action in gamestate.actions:
+        if (actions_by_target_base.get(str(action.dest)) is None):
+            actions_by_target_base[str(action.dest)] = []
+        actions_by_target_base[str(action.dest)].append(action)
+    return actions_by_target_base
         
-    return my_board_actions, other_board_actions
-'''
+
 
 def get_death_rate(config: GameConfig) -> int:
     '''
@@ -179,6 +233,8 @@ def get_spawn_rate(config: GameConfig, base: Base) -> int:
     '''
     Übergib den Namen einer Basis, returnt spawnrate der Basis
     '''
+    if (base.player == 0):
+        return 0
     return config.base_levels[base.level].spawn_rate
 
 def get_max_population(config: GameConfig, base: Base) -> int:
@@ -256,15 +312,20 @@ def do_spam_attack(config: GameConfig, srcbase: Base, otherbases: List[Base]) ->
 
     return PlayerAction(srcbase.uid, target.uid, attack_amount)
 
-def validate_attack(config: GameConfig, source: Base, target: Base) -> PlayerAction:
+def validate_send(config: GameConfig, source: Base, target: Base, amount=0) -> PlayerAction:
     '''
     validate and create attacks
     '''
     loss = (distance_3d(source.position, target.position) - config.paths.grace_period) * config.paths.death_rate
-
-    if loss <= 0:
-        return PlayerAction(source.uid, target.uid, source.population - 1)
-    if loss <= (source.population - 1) * ATTACK_THRESHOLD:
-        return PlayerAction(source.uid, target.uid, source.population - 1)
+    if amount == 0:
+        if loss <= 0:
+            return PlayerAction(source.uid, target.uid, source.population - 1)
+        if loss  * SEND_THRESHOLD <= (source.population - 1):
+            return PlayerAction(source.uid, target.uid, source.population - 1)
+    else:
+        if loss <= 0:
+            return PlayerAction(source.uid, target.uid, amount)
+        if loss  * SEND_THRESHOLD <= amount:
+            return PlayerAction(source.uid, target.uid, amount)
     
     return None
